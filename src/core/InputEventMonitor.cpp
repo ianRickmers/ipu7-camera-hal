@@ -124,7 +124,7 @@ int InputEventMonitor::readRawValue() {
     memset(codeBits, 0, sizeof(codeBits));
     status = ioctl(mFd, req, codeBits);
     if (status >= 0) {
-        mValue = (codeBits[mEventCode / U32_BITS] & (1UL << (mEventCode % U32_BITS)) != 0U) ? 1 : 0;
+        mValue = ((codeBits[mEventCode / U32_BITS] & (1UL << (mEventCode % U32_BITS))) != 0U) ? 1 : 0;
     }
 
     return status;
