@@ -20,6 +20,8 @@
 #include "InputEventMonitor.h"
 #include "iutils/CameraLog.h"
 
+#include <climits>
+#include <vector>
 #include <string>
 #include <fcntl.h>
 #include <unistd.h>
@@ -117,14 +119,12 @@ int InputEventMonitor::readRawValue() {
     if (mFd < 0 || mEventType < 0 || mEventCode < 0) return -1;
     
     int status = -1;
-    uint32_t bits = EVENTIOCTLMODES[mEventIoctlModesIndex].max;
     uint32_t req = EVENTIOCTLMODES[mEventIoctlModesIndex].rq;
-    uint32_t codeBits[bits / U32_BITS + 1];
+    std::vector<uint8_t> codeBits(_IOC_SIZE(req), 0);
 
-    memset(codeBits, 0, sizeof(codeBits));
-    status = ioctl(mFd, req, codeBits);
+    status = ioctl(mFd, req, codeBits.data());
     if (status >= 0) {
-        mValue = ((codeBits[mEventCode / U32_BITS] & (1UL << (mEventCode % U32_BITS))) != 0U) ? 1 : 0;
+        mValue = ((codeBits[mEventCode / CHAR_BIT] & (1UL << (mEventCode % CHAR_BIT))) != 0U) ? 1 : 0;
     }
 
     return status;
